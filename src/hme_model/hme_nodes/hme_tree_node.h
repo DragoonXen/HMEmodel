@@ -21,6 +21,8 @@ public:
 
 	void virtual save_model(fstream &save_stream) = 0;
 	double virtual evaluate_row(double* params) = 0;
+	double virtual posteriori_probability_calc(double expected_value) = 0;
+	void virtual adoption(double* params, double learn_speed) = 0;
 
 protected:
 	size_t parameters_count_;

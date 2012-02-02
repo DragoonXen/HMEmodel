@@ -77,10 +77,36 @@ double Hme_tree_gateway::evaluate_row(double* params) {
 	double left_decision_power = pow(M_E, left_child_plausibility);
 	double right_decision_power = pow(M_E, right_child_plausibility);
 
-	g_left_ = left_decision_power / (left_decision_power + right_decision_power);
-	g_right_ = right_decision_power / (left_decision_power + right_decision_power);
+	left_priori_probability_ = left_decision_power / (left_decision_power + right_decision_power);
+	right_priori_probability_ = right_decision_power / (left_decision_power + right_decision_power);
 
-	return left_child_evaluation * g_left_ + right_child_evaluation * g_right_;
+	double ret_value = left_child_evaluation * left_priori_probability_
+			+ right_child_evaluation * right_priori_probability_;
+	return ret_value;
+}
+
+double Hme_tree_gateway::posteriori_probability_calc(double expected_value) {
+	double z_left = left_child_->posteriori_probability_calc(expected_value);
+	double z_right = right_child_->posteriori_probability_calc(expected_value);
+
+	double tmp = left_priori_probability_ * z_left + right_priori_probability_ * z_right;
+	left_posteriori_probability_ = left_priori_probability_ * z_left / tmp;
+	right_posteriori_probability_ = right_priori_probability_ * z_right / tmp;
+	return tmp;
+}
+
+void Hme_tree_gateway::adoption(double* params, double learn_speed) {
+	double left_probability_error = (left_posteriori_probability_ - left_priori_probability_)
+			* learn_speed;
+	double right_probability_error = (right_posteriori_probability_ - right_priori_probability_)
+			* learn_speed;
+	for (size_t i = 0; i != parameters_count_; i++) {
+		A_[0][i] += params[i] * left_probability_error;
+		A_[1][i] += params[i] * right_probability_error;
+	}
+
+	left_child_->adoption(params, left_posteriori_probability_ * learn_speed);
+	right_child_->adoption(params, right_posteriori_probability_ * learn_speed);
 }
 
 } /* namespace hme_model */

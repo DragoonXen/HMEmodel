@@ -7,6 +7,8 @@
 
 #include "hme_tree_expert.h"
 
+#include <math.h>
+
 namespace hme_model {
 
 Hme_tree_expert::Hme_tree_expert(fstream &load_stream, size_t parameters_count) :
@@ -34,11 +36,23 @@ void Hme_tree_expert::save_model(fstream &save_stream) {
 }
 
 double Hme_tree_expert::evaluate_row(double* params) {
-	double rez = 0;
+	last_y_ = 0;
 	for (size_t i = 0; i != parameters_count_; i++) {
-		rez += W_[i] * params[i];
+		last_y_ += W_[i] * params[i];
 	}
-	return rez;
+	return last_y_;
+}
+
+double Hme_tree_expert::posteriori_probability_calc(double expected_value) {
+	error_ = expected_value - last_y_;
+	return pow(M_E, -error_ * error_ / 2.0);
+}
+
+void Hme_tree_expert::adoption(double* params, double learn_speed) {
+	double tmp = learn_speed * error_;
+	for (size_t i = 0; i != parameters_count_; i++) {
+		W_[i] += params[i] * tmp;
+	}
 }
 
 } /* namespace hme_model */

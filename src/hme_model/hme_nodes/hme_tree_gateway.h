@@ -19,6 +19,8 @@ public:
 
 	void save_model(fstream &save_stream);
 	double evaluate_row(double* params);
+	double posteriori_probability_calc(double expected_value);
+	void adoption(double* params, double learn_speed);
 
 private:
 	void init(fstream &load_stream, size_t parameters_count);
@@ -26,8 +28,10 @@ private:
 	double** A_;
 	Hme_tree_node *left_child_;
 	Hme_tree_node *right_child_;
-	double g_left_;
-	double g_right_;
+	double left_priori_probability_;
+	double right_priori_probability_;
+	double left_posteriori_probability_;
+	double right_posteriori_probability_;
 };
 
 } /* namespace hme_model */

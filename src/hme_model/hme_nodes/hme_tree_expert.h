@@ -19,11 +19,15 @@ public:
 
 	void save_model(fstream &save_stream);
 	double evaluate_row(double* params);
+	double posteriori_probability_calc(double expected_value);
+	void adoption(double* params, double learn_speed);
 
 private:
 	void init(fstream &load_stream, size_t parameters_count);
 
 	double *W_;
+	double last_y_;
+	double error_;
 };
 
 } /* namespace hme_model */

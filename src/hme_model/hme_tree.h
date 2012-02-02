@@ -19,6 +19,7 @@ using std::fstream;
 class Hme_tree {
 public:
 	Hme_tree(fstream &load_stream);
+	Hme_tree(fstream &load_stream, double learn_speed);
 	virtual ~Hme_tree();
 
 	size_t parameters_count();
@@ -32,6 +33,7 @@ private:
 
 	Hme_tree_node *root_node_;
 	size_t parameters_count_;
+	double learn_speed_;
 };
 
 } /* namespace hme_model */
