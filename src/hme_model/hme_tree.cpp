@@ -20,6 +20,10 @@ Hme_tree::~Hme_tree() {
 	delete (root_node_);
 }
 
+size_t Hme_tree::parameters_count() {
+	return parameters_count_;
+}
+
 void Hme_tree::init(fstream &load_stream) {
 	load_stream.read((char*) &parameters_count_, sizeof(parameters_count_));
 	bool root_is_leaf = false;
@@ -34,6 +38,14 @@ void Hme_tree::init(fstream &load_stream) {
 void Hme_tree::save_model(fstream &save_stream) {
 	save_stream.write((char*) &parameters_count_, sizeof(parameters_count_));
 	root_node_->save_model(save_stream);
+}
+
+double Hme_tree::evaluate_row(double* params) {
+	return root_node_->evaluate_row(params);
+}
+
+void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count) {
+
 }
 
 } /* namespace hme_model */

@@ -20,6 +20,7 @@ public:
 	virtual ~Hme_tree_node();
 
 	void virtual save_model(fstream &save_stream) = 0;
+	double virtual evaluate_row(double* params) = 0;
 
 protected:
 	size_t parameters_count_;

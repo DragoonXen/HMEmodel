@@ -21,7 +21,11 @@ public:
 	Hme_tree(fstream &load_stream);
 	virtual ~Hme_tree();
 
+	size_t parameters_count();
+
 	void save_model(fstream &save_stream);
+	double evaluate_row(double* params);
+	void learn(double** params_matrix, double* d_vector, size_t rows_count);
 
 private:
 	void init(fstream &load_stream);

@@ -18,6 +18,7 @@ public:
 	virtual ~Hme_tree_expert();
 
 	void save_model(fstream &save_stream);
+	double evaluate_row(double* params);
 
 private:
 	void init(fstream &load_stream, size_t parameters_count);

@@ -33,4 +33,12 @@ void Hme_tree_expert::save_model(fstream &save_stream) {
 	}
 }
 
+double Hme_tree_expert::evaluate_row(double* params) {
+	double rez = 0;
+	for (size_t i = 0; i != parameters_count_; i++) {
+		rez += W_[i] * params[i];
+	}
+	return rez;
+}
+
 } /* namespace hme_model */

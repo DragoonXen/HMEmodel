@@ -18,6 +18,7 @@ public:
 	virtual ~Hme_tree_gateway();
 
 	void save_model(fstream &save_stream);
+	double evaluate_row(double* params);
 
 private:
 	void init(fstream &load_stream, size_t parameters_count);
@@ -25,6 +26,8 @@ private:
 	double** A_;
 	Hme_tree_node *left_child_;
 	Hme_tree_node *right_child_;
+	double g_left_;
+	double g_right_;
 };
 
 } /* namespace hme_model */
