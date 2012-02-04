@@ -25,6 +25,7 @@ public:
 	void virtual adoption(double* params, double learn_speed) = 0;
 
 protected:
+	double mul(double* arr1, double* arr2);
 	size_t parameters_count_;
 };
 

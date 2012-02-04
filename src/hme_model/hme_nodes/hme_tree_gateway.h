@@ -25,7 +25,7 @@ public:
 private:
 	void init(fstream &load_stream, size_t parameters_count);
 
-	double** A_;
+	double* A_;
 	Hme_tree_node *left_child_;
 	Hme_tree_node *right_child_;
 	double left_priori_probability_;

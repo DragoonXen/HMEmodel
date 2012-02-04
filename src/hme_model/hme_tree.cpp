@@ -28,7 +28,7 @@ Hme_tree::Hme_tree(fstream &load_stream, double learn_speed) {
 }
 
 Hme_tree::Hme_tree(fstream &load_stream) {
-	learn_speed_ = 0.01;
+	learn_speed_ = 0.001;
 	init(load_stream);
 }
 
@@ -99,7 +99,8 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 		}
 		random_shuffle(row_numbers, row_numbers + train_rows_count);
 		for (size_t i = 0; i != train_rows_count; i++) {
-			double eval = evaluate_row(train_params_matrix[row_numbers[i]]);
+			//double eval =
+			evaluate_row(train_params_matrix[row_numbers[i]]);
 			root_node_->posteriori_probability_calc(train_d_vector[row_numbers[i]]);
 			root_node_->adoption(train_params_matrix[row_numbers[i]], learn_speed_);
 //#define test_hme_tree
@@ -110,7 +111,7 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 							- train_d_vector[row_numbers[i]]);
 			std::cout << "eval: " << eval << ", post eval: " << post_eval << std::endl;
 			assert(eval>=post_eval);
-#endif
+#endif /* ifdef test_hme_tree */
 		}
 
 		double sum_sqr_difference = .0;
@@ -132,6 +133,11 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 		if (best_sum_sqr_difference > sum_sqr_difference) {
 			best_sum_sqr_difference = sum_sqr_difference;
 			bad_iterations = 0;
+
+			std::fstream f_save_model("save_model.bin", std::ios_base::binary | std::ios_base::out);
+			save_model(f_save_model);
+			f_save_model.close();
+
 		} else {
 			bad_iterations++;
 			if (bad_iterations > 100) {

@@ -8,6 +8,7 @@
 #include "hme_tree_gateway.h"
 #include "hme_tree_expert.h"
 
+#include <assert.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
 
@@ -15,25 +16,19 @@ namespace hme_model {
 
 Hme_tree_gateway::Hme_tree_gateway(fstream &load_stream, size_t parameters_count) :
 		Hme_tree_node(parameters_count) {
-	A_ = new double*[2];
-	A_[0] = new double[parameters_count];
-	A_[1] = new double[parameters_count];
+	A_ = new double[parameters_count];
 	init(load_stream, parameters_count);
 }
 
 Hme_tree_gateway::~Hme_tree_gateway() {
-	delete[] A_[0];
-	delete[] A_[1];
 	delete[] A_;
 	delete (left_child_);
 	delete (right_child_);
 }
 
 void Hme_tree_gateway::init(fstream &load_stream, size_t parameters_count) {
-	for (size_t j = 0; j != 2; j++) {
-		for (size_t i = 0; i != parameters_count; i++) {
-			load_stream.read((char*) &A_[j][i], sizeof(A_[j][i]));
-		}
+	for (size_t i = 0; i != parameters_count; i++) {
+		load_stream.read((char*) A_ + i, sizeof(A_[i]));
 	}
 	bool child_is_leaf = false;
 	load_stream.read((char*) &child_is_leaf, sizeof(child_is_leaf));
@@ -54,10 +49,8 @@ void Hme_tree_gateway::init(fstream &load_stream, size_t parameters_count) {
 void Hme_tree_gateway::save_model(fstream &save_stream) {
 	bool is_leaf = false;
 	save_stream.write((char*) &is_leaf, sizeof(is_leaf));
-	for (size_t j = 0; j != 2; j++) {
-		for (size_t i = 0; i != parameters_count_; i++) {
-			save_stream.write((char*) &A_[j][i], sizeof(A_[j][i]));
-		}
+	for (size_t i = 0; i != parameters_count_; i++) {
+		save_stream.write((char*) A_ + i, sizeof(A_[i]));
 	}
 	left_child_->save_model(save_stream);
 	right_child_->save_model(save_stream);
@@ -70,9 +63,9 @@ double Hme_tree_gateway::evaluate_row(double* params) {
 	double left_child_plausibility = 0;
 	double right_child_plausibility = 0;
 	for (size_t i = 0; i != parameters_count_; i++) {
-		left_child_plausibility += A_[0][i] * params[i];
-		right_child_plausibility += A_[1][i] * params[i];
+		left_child_plausibility += A_[i] * params[i];
 	}
+	right_child_plausibility = -left_child_plausibility;
 
 	double left_decision_power = pow(M_E, left_child_plausibility);
 	double right_decision_power = pow(M_E, right_child_plausibility);
@@ -91,18 +84,18 @@ double Hme_tree_gateway::posteriori_probability_calc(double expected_value) {
 
 	double tmp = left_priori_probability_ * z_left + right_priori_probability_ * z_right;
 	left_posteriori_probability_ = left_priori_probability_ * z_left / tmp;
+	assert(left_posteriori_probability_ == left_posteriori_probability_);
 	right_posteriori_probability_ = right_priori_probability_ * z_right / tmp;
+	assert(right_posteriori_probability_ == right_posteriori_probability_);
 	return tmp;
 }
 
 void Hme_tree_gateway::adoption(double* params, double learn_speed) {
 	double left_probability_error = (left_posteriori_probability_ - left_priori_probability_)
 			* learn_speed;
-	double right_probability_error = (right_posteriori_probability_ - right_priori_probability_)
-			* learn_speed;
+	assert(left_probability_error == left_probability_error);
 	for (size_t i = 0; i != parameters_count_; i++) {
-		A_[0][i] += params[i] * left_probability_error;
-		A_[1][i] += params[i] * right_probability_error;
+		A_[i] += params[i] * left_probability_error;
 	}
 
 	left_child_->adoption(params, left_posteriori_probability_ * learn_speed);

@@ -7,6 +7,8 @@
 
 #include "hme_tree_expert.h"
 
+#include <assert.h>
+#include <iostream>
 #include <math.h>
 
 namespace hme_model {
@@ -45,7 +47,12 @@ double Hme_tree_expert::evaluate_row(double* params) {
 
 double Hme_tree_expert::posteriori_probability_calc(double expected_value) {
 	error_ = expected_value - last_y_;
-	return pow(M_E, -error_ * error_ / 2.0);
+	error_ /= 4.0;
+	double ret = pow(M_E, -error_ * error_ / 2.0);
+	if (ret < 1e-16) {
+		return 1e-16;
+	}
+	return ret;
 }
 
 void Hme_tree_expert::adoption(double* params, double learn_speed) {

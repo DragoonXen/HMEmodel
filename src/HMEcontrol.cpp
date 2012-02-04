@@ -50,11 +50,15 @@ int main(int argc, char* argv[]) {
 
 	std::cout.setf(std::ios_base::fixed);
 	std::cout.precision(6);
-	tree.learn(params_matrix, d_vector, rows_count);
 
-	std::fstream f_save_model("save_model.bin", std::ios_base::binary | std::ios_base::out);
-	tree.save_model(f_save_model);
-	f_save_model.close();
+	double rez = 0;
+	for (size_t i = 0; i != rows_count; i++) {
+		double tmp = tree.evaluate_row(params_matrix[i]) - d_vector[i];
+		rez += tmp * tmp;
+	}
+	std::cout << rez / rows_count << std::endl;
+
+	tree.learn(params_matrix, d_vector, rows_count);
 
 	for (size_t i = 0; i != rows_count; i++) {
 		delete[] params_matrix[i];
