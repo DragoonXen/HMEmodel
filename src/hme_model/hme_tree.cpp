@@ -22,9 +22,9 @@ namespace hme_model {
 
 using std::random_shuffle;
 
-Hme_tree::Hme_tree(fstream &load_stream, double learn_speed) {
+Hme_tree::Hme_tree(fstream &load_stream, double learn_speed, double leaves_error_multiplier) {
 	learn_speed_ = learn_speed;
-	init(load_stream);
+	init(load_stream, leaves_error_multiplier);
 }
 
 Hme_tree::Hme_tree(fstream &load_stream) {
@@ -40,14 +40,14 @@ size_t Hme_tree::parameters_count() {
 	return parameters_count_;
 }
 
-void Hme_tree::init(fstream &load_stream) {
+void Hme_tree::init(fstream &load_stream, double leaves_error_multiplier) {
 	load_stream.read((char*) &parameters_count_, sizeof(parameters_count_));
 	bool root_is_leaf = false;
 	load_stream.read((char*) &root_is_leaf, sizeof(root_is_leaf));
 	if (root_is_leaf) {
-		root_node_ = new Hme_tree_expert(load_stream, parameters_count_);
+		root_node_ = new Hme_tree_expert(load_stream, parameters_count_, leaves_error_multiplier);
 	} else {
-		root_node_ = new Hme_tree_gateway(load_stream, parameters_count_);
+		root_node_ = new Hme_tree_gateway(load_stream, parameters_count_, leaves_error_multiplier);
 	}
 }
 

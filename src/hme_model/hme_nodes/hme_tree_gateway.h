@@ -14,7 +14,7 @@ namespace hme_model {
 
 class Hme_tree_gateway: public Hme_tree_node {
 public:
-	Hme_tree_gateway(fstream &load_stream, size_t parameters_count);
+	Hme_tree_gateway(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier);
 	virtual ~Hme_tree_gateway();
 
 	void save_model(fstream &save_stream);
@@ -23,7 +23,7 @@ public:
 	void adoption(double* params, double learn_speed);
 
 private:
-	void init(fstream &load_stream, size_t parameters_count);
+	void init(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier);
 
 	double* A_;
 	Hme_tree_node *left_child_;

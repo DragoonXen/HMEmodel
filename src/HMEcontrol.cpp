@@ -5,23 +5,62 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+#include <string.h>
 #include <vector>
 
-using hme_model::Hme_tree;
-using std::vector;
-
 int main(int argc, char* argv[]) {
+
+	using hme_model::Hme_tree;
+	using std::vector;
+	using std::cout;
+	using std::endl;
+	using std::string;
+	using std::stringstream;
+
+	cout << "usage: " << endl << "-data [string] : data filename" << endl
+			<< "-model [string] : model filename" << endl
+			<< "-s [double] : tree learning speed (default 0.001) " << endl
+			<< "-l [double] : leaves error multiplier (default 1)" << endl;
+	string data_file = "data.learn";
+	string model_file = "base_model.bin";
+	double learning_speed = 0.001;
+	double leaves_error_multiplier = 1;
+	for (int i = 0; i != argc; i++) {
+		if (strcmp("-data", argv[i]) == 0) {
+			++i;
+			assert(i < argc);
+			data_file = argv[i];
+		} else if (strcmp("-model", argv[i]) == 0) {
+			++i;
+			assert(i < argc);
+			model_file = argv[i];
+		} else if (strcmp("-s", argv[i]) == 0) {
+			++i;
+			assert(i < argc);
+			stringstream sstr;
+			sstr << argv[i];
+			sstr >> learning_speed;
+		} else if (strcmp("-l", argv[i]) == 0) {
+			++i;
+			assert(i < argc);
+			stringstream sstr;
+			sstr << argv[i];
+			sstr >> leaves_error_multiplier;
+		}
+	}
+
 	//tree configuration load
-	std::fstream f_load_model("base_model.bin", std::ios_base::binary | std::ios_base::in);
-	Hme_tree tree(f_load_model, 0.001);
+	std::fstream f_load_model(model_file.c_str(), std::ios_base::binary | std::ios_base::in);
+	Hme_tree tree(f_load_model, learning_speed, leaves_error_multiplier);
 	f_load_model.close();
 
 	//load learning data
 	char line[5000];
-	std::ifstream learn_data("data.learn");
+	std::ifstream learn_data(data_file.c_str());
 	vector<vector<double>*> *input_matrix = new vector<vector<double>*>();
 	while (learn_data.getline(line, 5000)) {
-		std::stringstream sstr;
+		stringstream sstr;
 		sstr << line;
 		vector<double> *row = new vector<double>();
 		double tmp;
@@ -48,15 +87,15 @@ int main(int argc, char* argv[]) {
 	}
 	delete (input_matrix);
 
-	std::cout.setf(std::ios_base::fixed);
-	std::cout.precision(6);
+	cout.setf(std::ios_base::fixed);
+	cout.precision(6);
 
 	double rez = 0;
 	for (size_t i = 0; i != rows_count; i++) {
 		double tmp = tree.evaluate_row(params_matrix[i]) - d_vector[i];
 		rez += tmp * tmp;
 	}
-	std::cout << rez / rows_count << std::endl;
+	cout << rez / rows_count << endl;
 
 	tree.learn(params_matrix, d_vector, rows_count);
 

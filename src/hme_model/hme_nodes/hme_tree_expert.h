@@ -14,7 +14,7 @@ namespace hme_model {
 
 class Hme_tree_expert: public Hme_tree_node {
 public:
-	Hme_tree_expert(fstream &load_stream, size_t parameters_count);
+	Hme_tree_expert(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier);
 	virtual ~Hme_tree_expert();
 
 	void save_model(fstream &save_stream);
@@ -28,6 +28,7 @@ private:
 	double *W_;
 	double last_y_;
 	double error_;
+	double leaves_error_multiplier_;
 };
 
 } /* namespace hme_model */

@@ -19,7 +19,7 @@ using std::fstream;
 class Hme_tree {
 public:
 	Hme_tree(fstream &load_stream);
-	Hme_tree(fstream &load_stream, double learn_speed);
+	Hme_tree(fstream &load_stream, double learn_speed, double leaves_error_multiplier = 1.0);
 	virtual ~Hme_tree();
 
 	size_t parameters_count();
@@ -29,7 +29,7 @@ public:
 	void learn(double** params_matrix, double* d_vector, size_t rows_count);
 
 private:
-	void init(fstream &load_stream);
+	void init(fstream &load_stream, double leaves_error_multiplier = 1.0);
 
 	Hme_tree_node *root_node_;
 	size_t parameters_count_;

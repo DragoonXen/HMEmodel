@@ -14,10 +14,10 @@
 
 namespace hme_model {
 
-Hme_tree_gateway::Hme_tree_gateway(fstream &load_stream, size_t parameters_count) :
+Hme_tree_gateway::Hme_tree_gateway(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier) :
 		Hme_tree_node(parameters_count) {
 	A_ = new double[parameters_count];
-	init(load_stream, parameters_count);
+	init(load_stream, parameters_count, leaves_error_multiplier);
 }
 
 Hme_tree_gateway::~Hme_tree_gateway() {
@@ -26,23 +26,23 @@ Hme_tree_gateway::~Hme_tree_gateway() {
 	delete (right_child_);
 }
 
-void Hme_tree_gateway::init(fstream &load_stream, size_t parameters_count) {
+void Hme_tree_gateway::init(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier) {
 	for (size_t i = 0; i != parameters_count; i++) {
 		load_stream.read((char*) A_ + i, sizeof(A_[i]));
 	}
 	bool child_is_leaf = false;
 	load_stream.read((char*) &child_is_leaf, sizeof(child_is_leaf));
 	if (child_is_leaf) {
-		left_child_ = new Hme_tree_expert(load_stream, parameters_count);
+		left_child_ = new Hme_tree_expert(load_stream, parameters_count, leaves_error_multiplier);
 	} else {
-		left_child_ = new Hme_tree_gateway(load_stream, parameters_count);
+		left_child_ = new Hme_tree_gateway(load_stream, parameters_count, leaves_error_multiplier);
 	}
 
 	load_stream.read((char*) &child_is_leaf, sizeof(child_is_leaf));
 	if (child_is_leaf) {
-		right_child_ = new Hme_tree_expert(load_stream, parameters_count);
+		right_child_ = new Hme_tree_expert(load_stream, parameters_count, leaves_error_multiplier);
 	} else {
-		right_child_ = new Hme_tree_gateway(load_stream, parameters_count);
+		right_child_ = new Hme_tree_gateway(load_stream, parameters_count, leaves_error_multiplier);
 	}
 }
 

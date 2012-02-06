@@ -13,9 +13,10 @@
 
 namespace hme_model {
 
-Hme_tree_expert::Hme_tree_expert(fstream &load_stream, size_t parameters_count) :
+Hme_tree_expert::Hme_tree_expert(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier) :
 		Hme_tree_node(parameters_count) {
 	W_ = new double[parameters_count];
+	leaves_error_multiplier_ = leaves_error_multiplier;
 	init(load_stream, parameters_count);
 }
 
@@ -46,8 +47,7 @@ double Hme_tree_expert::evaluate_row(double* params) {
 }
 
 double Hme_tree_expert::posteriori_probability_calc(double expected_value) {
-	error_ = expected_value - last_y_;
-	error_ /= 4.0;
+	error_ = (expected_value - last_y_) * leaves_error_multiplier_;
 	double ret = pow(M_E, -error_ * error_ / 2.0);
 	if (ret < 1e-16) {
 		return 1e-16;
