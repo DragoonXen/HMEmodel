@@ -22,7 +22,9 @@ public:
 	void virtual save_model(fstream &save_stream) = 0;
 	double virtual evaluate_row(double* params) = 0;
 	double virtual posteriori_probability_calc(double expected_value) = 0;
-	void virtual adoption(double* params, double learn_speed) = 0;
+	void virtual adoption(double learn_speed) = 0;
+	void virtual status_remember() = 0;
+	void virtual status_recover() = 0;
 
 protected:
 	double mul(double* arr1, double* arr2);

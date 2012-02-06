@@ -20,12 +20,12 @@ int main(int argc, char* argv[]) {
 
 	cout << "usage: " << endl << "-data [string] : data filename" << endl
 			<< "-model [string] : model filename" << endl
-			<< "-s [double] : tree learning speed (default 0.001) " << endl
-			<< "-l [double] : leaves error multiplier (default 1)" << endl;
+			<< "-s [double] : tree learning speed (default 0.3) " << endl
+			<< "-l [double] : leaves error multiplier (default 4)" << endl;
 	string data_file = "data.learn";
 	string model_file = "base_model.bin";
-	double learning_speed = 0.001;
-	double leaves_error_multiplier = 1;
+	double learning_speed = 0.3;
+	double leaves_error_multiplier = 4;
 	for (int i = 0; i != argc; i++) {
 		if (strcmp("-data", argv[i]) == 0) {
 			++i;
@@ -98,6 +98,16 @@ int main(int argc, char* argv[]) {
 	cout << rez / rows_count << endl;
 
 	tree.learn(params_matrix, d_vector, rows_count);
+
+	std::fstream f_save_model("save_model.bin", std::ios_base::binary | std::ios_base::out);
+	tree.save_model(f_save_model);
+	f_save_model.close();
+
+	for (size_t i = 0; i != rows_count; i++) {
+		double tmp = tree.evaluate_row(params_matrix[i]) - d_vector[i];
+		rez += tmp * tmp;
+	}
+	cout << rez / rows_count << endl;
 
 	for (size_t i = 0; i != rows_count; i++) {
 		delete[] params_matrix[i];

@@ -102,42 +102,30 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 			//double eval =
 			evaluate_row(train_params_matrix[row_numbers[i]]);
 			root_node_->posteriori_probability_calc(train_d_vector[row_numbers[i]]);
-			root_node_->adoption(train_params_matrix[row_numbers[i]], learn_speed_);
+			root_node_->adoption(learn_speed_);
 //#define test_hme_tree
 #ifdef test_hme_tree
 			eval = fabs(eval - train_d_vector[row_numbers[i]]);
 			double post_eval = fabs(
 					evaluate_row(train_params_matrix[row_numbers[i]])
-							- train_d_vector[row_numbers[i]]);
+					- train_d_vector[row_numbers[i]]);
 			std::cout << "eval: " << eval << ", post eval: " << post_eval << std::endl;
 			assert(eval>=post_eval);
 #endif /* ifdef test_hme_tree */
 		}
 
 		double sum_sqr_difference = .0;
-		for (size_t i = 0; i != train_rows_count; i++) {
-			double tmp = evaluate_row(train_params_matrix[i]) - train_d_vector[i];
-			sum_sqr_difference += tmp * tmp;
-		}
-		std::cout << "iteration #" << iteration << ", train sqr sum difference (per one): "
-				<< sum_sqr_difference / train_rows_count;
-
-		sum_sqr_difference = .0;
 		for (size_t i = 0; i != valid_rows_count; i++) {
 			double tmp = evaluate_row(valid_params_matrix[i]) - valid_d_vector[i];
 			sum_sqr_difference += tmp * tmp;
 		}
-		std::cout << ", valid sqr sum difference (per one): "
+		std::cout << "iteration #" << iteration << ", valid sqr sum difference (per one): "
 				<< sum_sqr_difference / valid_rows_count << std::endl;
 
 		if (best_sum_sqr_difference > sum_sqr_difference) {
+			root_node_->status_remember();
 			best_sum_sqr_difference = sum_sqr_difference;
 			bad_iterations = 0;
-
-			std::fstream f_save_model("save_model.bin", std::ios_base::binary | std::ios_base::out);
-			save_model(f_save_model);
-			f_save_model.close();
-
 		} else {
 			bad_iterations++;
 			if (bad_iterations > 100) {
@@ -145,6 +133,7 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 			}
 		}
 	}
+	root_node_->status_recover();
 	std::cout << "best valid sqr sum difference (per one): "
 			<< best_sum_sqr_difference / valid_rows_count << std::endl;
 

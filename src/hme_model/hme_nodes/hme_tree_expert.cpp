@@ -13,36 +13,31 @@
 
 namespace hme_model {
 
-Hme_tree_expert::Hme_tree_expert(fstream &load_stream, size_t parameters_count, double leaves_error_multiplier) :
+Hme_tree_expert::Hme_tree_expert(fstream &load_stream, size_t parameters_count,
+		double leaves_error_multiplier) :
 		Hme_tree_node(parameters_count) {
-	W_ = new double[parameters_count];
 	leaves_error_multiplier_ = leaves_error_multiplier;
 	init(load_stream, parameters_count);
 }
 
 Hme_tree_expert::~Hme_tree_expert() {
-	delete[] W_;
+	delete (perceptrone);
 }
 
 void Hme_tree_expert::init(fstream &load_stream, size_t parameters_count) {
-	for (size_t i = 0; i != parameters_count; i++) {
-		load_stream.read((char*) &W_[i], sizeof(W_[i]));
-	}
+	perceptrone = new BackpropagationPerceptron(load_stream, 1.0, 0.5);
 }
 
 void Hme_tree_expert::save_model(fstream &save_stream) {
 	bool is_leaf = true;
 	save_stream.write((char*) &is_leaf, sizeof(is_leaf));
-	for (size_t i = 0; i != parameters_count_; i++) {
-		save_stream.write((char*) &W_[i], sizeof(W_[i]));
-	}
+	perceptrone->save(save_stream);
 }
 
 double Hme_tree_expert::evaluate_row(double* params) {
-	last_y_ = 0;
-	for (size_t i = 0; i != parameters_count_; i++) {
-		last_y_ += W_[i] * params[i];
-	}
+	double* rez = perceptrone->evaluate(params);
+	last_y_ = rez[0];
+	delete[] rez;
 	return last_y_;
 }
 
@@ -55,11 +50,16 @@ double Hme_tree_expert::posteriori_probability_calc(double expected_value) {
 	return ret;
 }
 
-void Hme_tree_expert::adoption(double* params, double learn_speed) {
+void Hme_tree_expert::adoption(double learn_speed) {
 	double tmp = learn_speed * error_;
-	for (size_t i = 0; i != parameters_count_; i++) {
-		W_[i] += params[i] * tmp;
-	}
+	perceptrone->teach_by_errors_row(&tmp);
+}
+
+void Hme_tree_expert::status_remember() {
+	perceptrone->status_remember();
+}
+void Hme_tree_expert::status_recover() {
+	perceptrone->status_recover();
 }
 
 } /* namespace hme_model */
