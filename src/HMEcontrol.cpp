@@ -8,6 +8,7 @@
 #include <string>
 #include <string.h>
 #include <vector>
+#include <omp.h>
 
 int main(int argc, char* argv[]) {
 
@@ -91,7 +92,9 @@ int main(int argc, char* argv[]) {
 	cout.precision(6);
 
 	double rez = 0;
-	for (size_t i = 0; i != rows_count; i++) {
+#pragma omp parallel
+#pragma omp for reduction(+: rez)
+	for (size_t i = 0; i < rows_count; i++) {
 		double tmp = tree.evaluate_row(params_matrix[i]) - d_vector[i];
 		rez += tmp * tmp;
 	}

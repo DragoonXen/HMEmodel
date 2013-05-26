@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <iostream>
+#include <omp.h>
 
 namespace hme_model {
 
@@ -66,7 +67,7 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 		row_numbers[i] = i;
 	}
 
-	srand(time(NULL));
+	srand(13);
 	random_shuffle(row_numbers, row_numbers + rows_count);
 
 	size_t valid_rows_count = rows_count / 10;
@@ -99,7 +100,6 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 		}
 		random_shuffle(row_numbers, row_numbers + train_rows_count);
 		for (size_t i = 0; i != train_rows_count; i++) {
-			//double eval =
 			evaluate_row(train_params_matrix[row_numbers[i]]);
 			root_node_->posteriori_probability_calc(train_d_vector[row_numbers[i]]);
 			root_node_->adoption(train_params_matrix[row_numbers[i]], learn_speed_);
@@ -115,15 +115,20 @@ void Hme_tree::learn(double** params_matrix, double* d_vector, size_t rows_count
 		}
 
 		double sum_sqr_difference = .0;
-		for (size_t i = 0; i != train_rows_count; i++) {
+#pragma omp parallel
+#pragma omp for reduction(+: sum_sqr_difference)
+		for (size_t i = 0; i < train_rows_count; i++) {
 			double tmp = evaluate_row(train_params_matrix[i]) - train_d_vector[i];
 			sum_sqr_difference += tmp * tmp;
 		}
+
 		std::cout << "iteration #" << iteration << ", train sqr sum difference (per one): "
 				<< sum_sqr_difference / train_rows_count;
 
 		sum_sqr_difference = .0;
-		for (size_t i = 0; i != valid_rows_count; i++) {
+#pragma omp parallel
+#pragma omp for reduction(+: sum_sqr_difference)
+		for (size_t i = 0; i < valid_rows_count; i++) {
 			double tmp = evaluate_row(valid_params_matrix[i]) - valid_d_vector[i];
 			sum_sqr_difference += tmp * tmp;
 		}
